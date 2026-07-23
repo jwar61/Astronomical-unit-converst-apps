@@ -1,6 +1,4 @@
-# Astronomical-unit-converst-apps
-
-# 🌌 Astronomical Unit Converter
+# Astronomical Unit Converter
 
 An interactive **Streamlit** web application for converting common **astronomical distance** and **angular measurement** units. This project is designed for astronomy students, researchers, and enthusiasts who need quick and accurate unit conversions.
 
