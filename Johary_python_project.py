@@ -102,7 +102,10 @@ class AngularConverter:
         return deg * 3600 
 
     def arcsec_to_deg(self, arcsec):
-        return arcsec / 3600
+        return arcsec / 
+
+    def arcsec_to_parsec(self, arcsec):
+            return 1/ arcsec
 
     def convert(self, conversion_type, value):
         conversions = {
@@ -112,6 +115,7 @@ class AngularConverter:
             "Arcseconds → Arcminutes": (self.arcsec_to_arcmin, "arcminutes"),
             "Degrees → Arcseconds": (self.deg_to_arcsec, "arcseconds"),
             "Arcseconds → Degrees": (self.arcsec_to_deg, "degrees"),
+            "Arcseconds → Parsecs": (self.arcsec_to_parsec, "Parsecs"),
         }
         func, unit = conversions[conversion_type]
         return func(value), unit
@@ -152,6 +156,7 @@ else:
             "Arcseconds → Arcminutes",
             "Degrees → Arcseconds",
             "Arcseconds → Degrees",
+            "Arcseconds → Parsecs",
         ]
     )
 
