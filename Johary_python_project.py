@@ -1,6 +1,20 @@
 import streamlit as st
 import base64
 
+st.markdown(
+    """
+    <style>
+    .stApp {
+        background-image: url("https://assets.science.nasa.gov/dynamicimage/assets/science/psd/solar/2023/09/o/OSS.jpg?w=2925&h=2229&fit=clip&crop=faces%2Cfocalpoint");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 st.set_page_config(page_title="Astronomical Unit Converter")
 st.title("Astronomical Unit Converter")
@@ -88,10 +102,10 @@ class AngularConverter:
         return deg * 3600 
 
     def arcsec_to_deg(self, arcsec):
-        return arcsec / 
+        return arcsec / 3600 
 
     def arcsec_to_parsec(self, arcsec):
-            return 1/ arcsec
+            return 1 / arcsec
 
     def convert(self, conversion_type, value):
         conversions = {
