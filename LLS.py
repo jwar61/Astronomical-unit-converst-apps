@@ -1,8 +1,6 @@
 import numpy as np
 import pandas as pd
 import streamlit as st
-import astropy.units as u
-from astropy.cosmology import FlatLambdaCDM
 
 st.set_page_config(page_title="LAS to LLS converter", page_icon="🔭", layout="centered")
 
@@ -11,13 +9,27 @@ LAS_UNITS = {"arcsec": 1.0, "arcmin": 60.0, "degree": 3600.0}
 LLS_UNITS = {"pc": 1e6, "kpc": 1e3, "Mpc": 1.0}  # factor from Mpc
 
 
+C_KMS = 299792.458
+_ZGRID = np.linspace(0.0, 12.0, 48001)
+
+
+@st.cache_data
+def _dc_table(h0, om):
+    """Comoving distance (Mpc) on a fine redshift grid, flat LCDM, no astropy needed."""
+    f = 1.0 / np.sqrt(om * (1.0 + _ZGRID) ** 3 + (1.0 - om))
+    cum = np.concatenate(([0.0], np.cumsum(0.5 * (f[1:] + f[:-1]) * np.diff(_ZGRID))))
+    return (C_KMS / h0) * cum
+
+
 def make_cosmo(h0, om):
-    return FlatLambdaCDM(H0=h0, Om0=om)
+    return (float(h0), float(om))
 
 
 def d_a_mpc(z, cosmo):
     """Angular diameter distance in Mpc (works for scalars and arrays)."""
-    return cosmo.angular_diameter_distance(z).to(u.Mpc).value
+    h0, om = cosmo
+    z = np.asarray(z, dtype=float)
+    return np.interp(z, _ZGRID, _dc_table(h0, om)) / (1.0 + z)
 
 
 def lls_mpc(las_arcsec, z, cosmo):
