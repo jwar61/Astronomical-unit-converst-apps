@@ -2,8 +2,6 @@ import altair as alt
 import numpy as np
 import pandas as pd
 import streamlit as st
-from astropy import units as u
-from astropy.cosmology import FlatLambdaCDM, Planck15, Planck18, WMAP9
 
 st.set_page_config(page_title="Radio Power P(z, S, α)", page_icon="📡", layout="wide")
 
@@ -15,14 +13,29 @@ PREFACTOR = 4 * np.pi * MPC_M**2 * 1e-26  # W/Hz per (Jy * Mpc^2) = 1.197e20
 # ----------------------------------------------------------------------------
 # The function P(z, S, alpha)
 # ----------------------------------------------------------------------------
+C_KMS = 299792.458
+PRESETS = {  # flat LCDM (H0 [km/s/Mpc], Omega_m); radiation neglected
+    "Planck18": (67.66, 0.30966),
+    "Planck15": (67.74, 0.3075),
+    "WMAP9": (69.32, 0.2865),
+}
+
+
 def get_cosmology(name, h0, om):
-    return {"Planck18": Planck18, "Planck15": Planck15, "WMAP9": WMAP9}.get(
-        name, None
-    ) or FlatLambdaCDM(H0=h0, Om0=om)
+    return PRESETS.get(name, (h0, om))
 
 
 def luminosity_distance_mpc(z, cosmo):
-    return cosmo.luminosity_distance(np.asarray(z, float)).to(u.Mpc).value
+    """D_L = (1+z) c/H0 * integral_0^z dz'/E(z') for flat LCDM (numpy only)."""
+    h0, om = cosmo
+    z = np.asarray(z, float)
+    flat = z.ravel()
+    zmax = max(float(np.nanmax(flat)), 1e-6)
+    grid = np.linspace(0.0, zmax, 4001)
+    f = 1.0 / np.sqrt(om * (1 + grid) ** 3 + (1 - om))
+    cum = np.concatenate([[0.0], np.cumsum(0.5 * (f[1:] + f[:-1]) * np.diff(grid))])
+    dc = C_KMS / h0 * np.interp(flat, grid, cum)  # comoving distance [Mpc]
+    return ((1 + flat) * dc).reshape(z.shape)
 
 
 def radio_power(s_jy, z, alpha, cosmo):
